@@ -96,6 +96,8 @@ To add support for a new Watchword version, you must do all of the following:
 0.4.x
 
 - Removed `/coverage` command for simplicity
+  - From this point, the application should only contain functionality relating to the Watchword game
+  - Any miscellaneous functionality (such as the former `/coverage`) will be moved to the `/utils/` directory
 
 <!-- Abandoned; converted to `/utils/`
 0.4.x
