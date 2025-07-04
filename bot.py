@@ -14,7 +14,7 @@ load_dotenv()
 
 TOKEN = os.environ['DISCORD_TOKEN']
 
-VERSION = '0.4.0'
+VERSION = '0.4.4'
 
 
 WATCHWORD_REFERENCES: dict[str, str | None] = json.loads(
@@ -108,15 +108,34 @@ async def check(
     word = word.upper().strip()
     word = ''.join(c for c in word if c in ascii_uppercase)
     print(f'\tProcessed: "{word}"')
-    for x, y in [
-        (any(c not in ascii_uppercase for c in word), 'Words must have letters only!'),
+    for _error_condition, _error_message in [
+        (not word, 'Word is empty!'),
         (not 2 <= len(word) <= 40, 'Words must be between 2 and 40 characters long!'),
+        (any(c not in ascii_uppercase for c in word), 'Words must have letters only!'),
+        (version not in WATCHWORD_VERSIONS, 'Version is not tracked!'),
+        (version not in WATCHWORD_REFERENCES, 'Reference for version not found!'),
     ]:
-        if x:
+        if _error_condition:
             await interaction.response.defer(ephemeral=True)
-            print(f'\tInvalid input: "{y}"')
+            print(f'\tInvalid input: "{_error_message}"')
+            try:
+                _version_string = create_version_string(version)
+            except IndexError:
+                _version_string = '(could not be parsed)'
+            _processed_input = '\n'.join(
+                [
+                    f'word: {word or "(could not be parsed)"}',
+                    f'version: {_version_string}',
+                ],
+            )
             await interaction.followup.send(
-                f':warning: Invalid input: `{word or "(empty)"}`\n> {y}',
+                embed=embed(
+                    title=':warning: An error was caught!',
+                    description=f'Processed input:\n```\n{_processed_input}\n```',
+                    color=0xffff00,
+                ).add_field(
+                    name='Reason', value=f'> {_error_message}', inline=False,
+                ),
             )
             return
     await interaction.response.defer()
@@ -192,8 +211,10 @@ if __name__ == '__main__':
 
     print(f'Loaded {len(wordlist_full):_} total words')
 
-    _definitions_temp = json.loads(Path('data', 'dictionary_combined.json').read_text())
-    definitions = {
+    _definitions_temp: dict[str, str] = json.loads(
+        Path('data', 'dictionary_combined.json').read_text(),
+    )
+    definitions: dict[str, str] = {
         key: val for key, val in _definitions_temp.items() if key in wordlist_full
     }
     print(
