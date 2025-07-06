@@ -1,7 +1,7 @@
 # utils
 
 > [!WARNING]
-> These scripts use your local modified [data](../data) files. The [README](../data/README.md) for data is required reading, and if processing a new version, you're expected to have followed the instructions under ["Adding support for a new version"](../data/README.md#adding-support-for-a-new-version).
+> These scripts use your local modified [data](../data) files. That folder's README is required reading, and if processing a new version, you're expected to have followed the instructions under ["Adding support for a new version"](../data/README.md#adding-support-for-a-new-version).
 >
 > - `<version>_<...>.txt` files must exist under `/data/wordlists/`
 > - `watchword_flags.json`, `watchword_references.json`, and `watchword_versions.json` must all be updated accordingly
