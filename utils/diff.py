@@ -22,6 +22,7 @@ def _utils_diff(
         for version in (version_old, version_new)
     ):
         print(f'skipping {wordlist_type}..')
+        return set(), set()
 
     print(f'{version_old}_{wordlist_type}.txt -> {version_new}_{wordlist_type}.txt')
 
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 
         for operation, output in {
             'additions': additions, 'removals': removals,
-        }.values():
+        }.items():
             if output:
                 Path(
                     'utils',
