@@ -27,8 +27,8 @@ def _utils_coverage(wordlist: set[str], definitions: dict[str, str]) -> str:
     }
     return '\n'.join(
         [
-            f'words: {len(wordlist):,}',
-            f'definitions: {len(used_definitions):,}',
+            f'words: {len(wordlist):_}',
+            f'definitions: {len(used_definitions):_}',
             f'coverage: {len(used_definitions) / len(wordlist) * 100:.2f}%',
         ],
     )

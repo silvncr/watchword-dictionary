@@ -50,7 +50,7 @@ if __name__ == '__main__':
             for word in path.read_text().strip().splitlines():
                 wordlist.add(word)
 
-    print(f'{version}: {len(wordlist)}')
+    print(f'{version}: {len(wordlist):_}')
 
     output = _utils_filter(
         wordlist=wordlist,
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     ).hexdigest()[:6]
     print(f'{check_hash=}')
 
-    print(f'number of words in output: {len(output)}')
+    print(f'number of words in output: {len(output):_}')
 
     if output:
         Path('utils', 'out').mkdir(parents=True, exist_ok=True)
