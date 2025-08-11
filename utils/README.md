@@ -32,6 +32,15 @@ Your working directory should be `watchword-dictionary`, not `utils`.
   - `<type>` is the wordlist type
   - `<operation>` is "additions" or "removals"
 
+`./doubles.py`
+
+- Counts the number of times a double-letter is used in a word, totaled for the whole latest wordlist
+
+  - The latest version is determined by being at the top of `watchword_versions.json`
+
+- Outputs to: `./out/doubles_<version>.json` (one output)
+  - `<version>` is a Watchword game version, documented above
+
 `./filter.py`
 
 - Filters the latest wordlist according to arbitrary parameters
