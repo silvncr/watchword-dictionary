@@ -82,7 +82,7 @@ if __name__ == '__main__':
     if output:
         Path('utils', 'out').mkdir(parents=True, exist_ok=True)
         Path(
-            'utils', 'out', f'filter_{version}_{len(output)}_{check_hash}',
+            'utils', 'out', f'filter_{version}_{len(output)}_{check_hash}.txt',
         ).write_text(
             '\n'.join(
                 sorted(
