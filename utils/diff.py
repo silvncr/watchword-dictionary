@@ -16,13 +16,13 @@ versions: list[str] = json.loads(Path('data', 'watchword_versions.json').read_te
 
 def _utils_diff(
     version_old: str, version_new: str, wordlist_type: str,
-) -> tuple[set[str], set[str]]:
+) -> tuple[set[str], set[str]] | None:
     if not all(
         Path('data', 'wordlists', f'{version}_{wordlist_type}.txt').exists()
         for version in (version_old, version_new)
     ):
         print(f'skipping {wordlist_type}..')
-        return set(), set()
+        return None
 
     print(f'{version_old}_{wordlist_type}.txt -> {version_new}_{wordlist_type}.txt')
 
@@ -66,11 +66,16 @@ if __name__ == '__main__':
     version_new = versions[0]
 
     for wordlist_type in flags:
-        additions, removals = _utils_diff(
+        _out = _utils_diff(
             version_old=version_old,
             version_new=version_new,
             wordlist_type=wordlist_type,
         )
+
+        if _out is None:
+            continue
+
+        additions, removals = _out
 
         print(f'\tdiff: {len(additions):_} additions, {len(removals):_} removals')
 
