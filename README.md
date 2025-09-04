@@ -6,6 +6,8 @@ This repository contains the data files for the Watchword game dictionary, which
 - Interactive webapp: <https://silvncr.github.io/watchword-dictionary/>
 - Discord bot (uptime is not guaranteed): <https://discord.com/oauth2/authorize?client_id=1376949038061981860>
 
+The game is available on [Steam](watchword-steam). I am not affiliated. See [Legal](#legal).
+
 ---
 
 ## Structure
@@ -58,3 +60,17 @@ Components to be documented:
 - Added basic `/ping` command
 
 ---
+
+# Legal
+
+This repository is licensed under the [BSD 3-Clause License](LICENSE).
+
+This repository contains copyrighted material which is not owned by me. All intellectual property rights for [*Watchword*](watchword) belong to [Big Quail Games](bigquailgames). This repository is for educational purposes only and is not intended for commercial gain.
+
+This repository and the project/s it contains are created and maintained with permission from the copyright holder/s.
+
+---
+
+[bigquailgames]: https://bigquailgames.com/
+[watchword]: https://watchwordgame.com/
+[watchword-steam]: https://store.steampowered.com/app/2906730/Watchword/
