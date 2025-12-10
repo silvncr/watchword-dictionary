@@ -33,7 +33,7 @@ def _utils_filter(wordlist: set[str], check: typing.Callable) -> set[str]:
                     # print(f'word: {word} not in reference')
                     output.add(word)
             bar()
-    return output
+    return sorted(output)
 
 
 if __name__ == '__main__':
@@ -67,19 +67,22 @@ if __name__ == '__main__':
     )
     check_hash = hashlib.sha256(
         str(inspect.getsourcelines(check)[0])
-            .replace("['", "")
-            .replace("\\n']", "")
-            .replace('  ', ' ')
-            .replace('  ', ' ')
-            .split("=")[1]
-            .strip()
-            .encode('utf-8'),
+        .replace("['", '')
+        .replace("\\n']", '')
+        .replace('  ', ' ')
+        .replace('  ', ' ')
+        .split('=')[1]
+        .strip()
+        .encode('utf-8'),
     ).hexdigest()[:6]
     print(f'{check_hash=}')
 
     print(f'number of words in output: {len(output):_}')
 
     if output:
+        if len(output) <= 1_000:
+            print(', '.join(output))
+
         Path('utils', 'out').mkdir(parents=True, exist_ok=True)
         Path(
             'utils', 'out', f'filter_{version}_{len(output)}_{check_hash}.txt',
