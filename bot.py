@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 from pathlib import Path
 from string import ascii_uppercase
 
@@ -14,7 +15,7 @@ load_dotenv()
 
 TOKEN = os.environ['DISCORD_TOKEN']
 
-VERSION = '0.4.4'
+VERSION = '0.5.2'
 
 
 WATCHWORD_REFERENCES: dict[str, str | None] = json.loads(
@@ -23,6 +24,18 @@ WATCHWORD_REFERENCES: dict[str, str | None] = json.loads(
 WATCHWORD_VERSIONS: list[str] = json.loads(
     Path('data', 'watchword_versions.json').read_text(),
 )
+
+
+class VERSIONS:
+    # main
+    bot = VERSION
+    watchword = WATCHWORD_VERSIONS[0]
+
+    # wordlist
+    qrs = '3.0.0'
+    listpatches = '1.0'
+    wordlist_cleaner = '0.2'
+    cleanlist = '0.1.0-pre'
 
 
 def find_reference(version: str) -> str:
@@ -124,7 +137,7 @@ async def check(
                 _version_string = '(could not be parsed)'
             _processed_input = '\n'.join(
                 [
-                    f'word: {word or "(could not be parsed)"}',
+                    f'word: {word or '(could not be parsed)'}',
                     f'version: {_version_string}',
                 ],
             )
@@ -132,10 +145,8 @@ async def check(
                 embed=embed(
                     title=':warning: An error was caught!',
                     description=f'Processed input:\n```\n{_processed_input}\n```',
-                    color=0xffff00,
-                ).add_field(
-                    name='Reason', value=f'> {_error_message}', inline=False,
-                ),
+                    color=0xFFFF00,
+                ).add_field(name='Reason', value=f'> {_error_message}', inline=False),
             )
             return
     await interaction.response.defer()
@@ -158,7 +169,7 @@ async def check(
         print(f'\tFlags: {(_flags := wordlists[version_referenced][word])}')
         _embed.add_field(
             name='Flags',
-            value=f'{", ".join(sorted(_flags))}' if _flags else '(none)',
+            value=f'{', '.join(sorted(_flags))}' if _flags else '(none)',
             inline=False,
         )
         await interaction.followup.send(embed=_embed)
@@ -173,6 +184,114 @@ async def check(
         )
 
 
+@client.slash_command(
+    name='coverage', description='Get the coverage of word definitions',
+)
+async def coverage(
+    interaction: nextcord.Interaction, version: str = OPTIONS['version'],
+) -> None:
+    'Get the coverage of word definitions in the Watchword dictionary.'
+    await interaction.response.defer(ephemeral=True)
+    version_ref = find_reference(version)
+    version_s = create_version_string(version)
+    _words = len(wordlists[version_ref])
+    _definitions = len({word for word in definitions if word in wordlists[version_ref]})
+    await interaction.followup.send(
+        embed=embed(
+            title=':bar_chart: Coverage',
+            description=f'Watchword {version_s}```\n{
+                '\n'.join(
+                    [
+                        f'words: {_words:,}',
+                        f'definitions: {_definitions:,}',
+                        f'coverage: {_definitions / _words * 100:.2f}%',
+                    ]
+                )
+            }\n```',
+        ),
+    )
+    print(f'Coverage requested by {interaction.user} ({interaction.user.id})')  # type: ignore
+
+
+@client.slash_command(
+    name='host',
+    description='Pull information about the host machine (for debugging purposes)',
+)
+async def host(interaction: nextcord.Interaction) -> None:
+    'Host command to check host machine info'
+    await interaction.response.defer(ephemeral=True)
+    await interaction.followup.send(
+        embed=embed(
+            title=':desktop: Host machine',
+            description=f'```\n{
+                '\n'.join(
+                    [
+                        f'os: {
+                            ' '.join(
+                                [
+                                    *platform.system_alias(
+                                        system=platform.system(),
+                                        release=platform.release(),
+                                        version=platform.version()
+                                    )[:-1],
+                                    platform.machine()
+                                ]
+                            )
+                        } ',
+                        (
+                            'python:'
+                            f' {platform.python_implementation()}'
+                            f' {platform.python_version()}'
+                        ),
+                    ]
+                )
+            }\n```',
+        ),
+    )
+
+
+@client.slash_command(
+    name='info', description='See information about Watchword and this bot',
+)
+async def info(interaction: nextcord.Interaction) -> None:
+    'Info command to give information on Watchword and this bot'
+    await interaction.response.defer(ephemeral=True)
+    await interaction.followup.send(
+        embed=embed(
+            title=f':eyes: Watchword Dictionary v{VERSION}',
+            description='<https://github.com/silvncr/watchword-dictionary>',
+        )
+        .add_field(
+            name='What is Watchword?',
+            value=(
+                '[**Watchword**](https://store.steampowered.com/app/2906730/Watchword/)'
+                ' is a word-based roguelike deckbuilder, developed and published'
+                ' by **Big Quail Games**.'
+            ),
+            inline=False,
+        )
+        .add_field(
+            name='What is Watchword Dictionary?',
+            value=(
+                'This bot is a helper tool for Watchword. Its main purpose is'
+                ' letting you check if a word is legal to play, but it\'s since'
+                ' expanded to track various data across game versions.'
+            ),
+            inline=False,
+        )
+        .add_field(
+            name='What is your affiliation?',
+            value=(
+                'This bot was made and continues to exists with permission from,'
+                ' but not affiliation with, the game\'s creator. This bot exists as a'
+                ' separate tool, with its code and datasets hosted online,'
+                ' open-sourced and free to view on GitHub (linked above).'
+            ),
+            inline=False,
+        ),
+    )
+
+
 @client.slash_command(name='ping', description='Measure the current bot latency')
 async def ping(interaction: nextcord.Interaction) -> None:
     'Ping command to check bot latency.'
@@ -181,7 +300,40 @@ async def ping(interaction: nextcord.Interaction) -> None:
     await interaction.followup.send(
         embed=embed(title=':ping_pong: Pong!', description=f'```\n{_latency} ms\n```'),
     )
-    print(f'Ping by {interaction.user} ({interaction.user.id}) - {_latency} ms')  # type: ignore
+    print(
+        f'Ping requested by {interaction.user} ({interaction.user.id})',
+        f'- {_latency} ms',
+    )
+
+
+@client.slash_command(
+    name='versions',
+    description='Fetch the versions of apps and tools the bot depends on',
+)
+async def versions(interaction: nextcord.Interaction) -> None:
+    'Versions command to check various app and tool versions'
+    await interaction.response.defer(ephemeral=True)
+    await interaction.followup.send(
+        embed=embed(
+            title=':clipboard: Versions',
+            description='\n'.join(
+                [
+                    '```',
+                    '  main',
+                    f'bot: {VERSIONS.bot}',
+                    f'watchword: {VERSIONS.watchword}',
+                    '',
+                    '  wordlist',
+                    f'qrs: {VERSIONS.qrs}',
+                    f'listpatches: {VERSIONS.listpatches}',
+                    f'wordlist-cleaner: {VERSIONS.wordlist_cleaner}',
+                    f'cleanlist: {VERSIONS.cleanlist}',
+                    '```',
+                ],
+            ),
+        ),
+    )
+    print(f'Info requested by {interaction.user} ({interaction.user.id})')
 
 
 if __name__ == '__main__':

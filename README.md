@@ -3,8 +3,10 @@
 
 This repository contains the data files for the Watchword game dictionary, which are used by the following tools:
 
-- Interactive webapp: <https://silvncr.github.io/watchword-dictionary/>
-- Discord bot (uptime is not guaranteed): <https://discord.com/oauth2/authorize?client_id=1376949038061981860>
+- **Recommended use:** Discord bot (<https://discord.com/oauth2/authorize?client_id=1376949038061981860>)
+  - Works in DMs, servers shared with the bot, or anywhere (ephemerally)
+  - Hosted locally by me; uptime is not guaranteed
+- Secondary use: Interactive webapp (<https://silvncr.github.io/watchword-dictionary/>)
 
 The game is available on [Steam](watchword-steam). I am not affiliated. See [Legal](#legal).
 
@@ -24,13 +26,22 @@ Components to be documented:
 ## Changelog
 
 > [!NOTE]
-> Development occurs on the Discord bot first, then the webapp is updated for parity. As such, only the Discord bot is version-tracked.
+> Development occurs on the Discord bot first, then the webapp is updated for parity where necessary (some features may be missing). As such, only the Discord bot is version-tracked.
+
+0.5.x
+
+- Added `/info` command; gives information about the bot, links to this repo, etc.
+- Re-added unreleased commands: `/host` and `/versions`
+  - `/host` displays host information (for debugging purposes)
+  - `/versions` displays app and tool ("dependency") versions
+- Re-added `/coverage` command
+  - It's fun, I feel bad if it's not included
 
 0.4.x
 
-- Removed `/coverage` command for simplicity
-  - From this point, the application should only contain functionality relating to the Watchword game
-  - Any miscellaneous functionality (such as the former `/coverage`) will be moved to [utils](utils)
+- ~~Removed `/coverage` command for simplicity~~
+  - ~~From this point, the application should only contain functionality relating to the Watchword game~~
+  - ~~Any miscellaneous functionality (such as the former `/coverage`) will be moved to [utils](utils)~~
 
 <!--
 0.4.x - abandoned; converted to utils
