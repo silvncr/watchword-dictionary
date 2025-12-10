@@ -85,11 +85,11 @@ def find_definition(word: str) -> str | None:
 @client.event
 async def on_ready() -> None:
     'Event triggered when the bot is ready.'
-    print(f'Logged in as {client.user} (ID: {client.user.id})')  # type: ignore
+    print(f'Logged in as {client.user} ({client.user.id})')  # type: ignore
     await client.change_presence(
         activity=nextcord.Activity(
             type=nextcord.ActivityType.watching,
-            name=f'for {len(wordlist_full):,} words',
+            name=f'Watching for {len(wordlist_full):,} words',
         ),
         status=nextcord.Status.online,
     )
@@ -104,7 +104,7 @@ async def check(
     version: str = OPTIONS['version'],
 ) -> None:
     'Check a word against the Watchword dictionary.'
-    print(f'Word check by {interaction.user} ({interaction.user.id}) - "{word}"')  # type: ignore
+    print(f'Check requested by {interaction.user} ({interaction.user.id}) - "{word}"')  # type: ignore
     word = word.upper().strip()
     word = ''.join(c for c in word if c in ascii_uppercase)
     print(f'\tProcessed: "{word}"')
@@ -185,6 +185,7 @@ async def ping(interaction: nextcord.Interaction) -> None:
 
 
 if __name__ == '__main__':
+    print(f'\n\tWatchword Dictionary v{VERSION}\n')
     wordlists: dict[str, dict[str, set[str]]] = {}
     wordlist_full: set[str] = set()
     for _version in WATCHWORD_VERSIONS:
@@ -203,11 +204,14 @@ if __name__ == '__main__':
                     | set(_flags)
                     for word in _path.read_text().strip().splitlines()
                 }
+        wordlist_full.update(wordlists[_version].keys())
         if not wordlists[_version]:
             print('\tNo words found')
             continue
-        print(f'\tLoaded {len(wordlists[_version]):_} words')
-        wordlist_full.update(wordlists[_version].keys())
+        print(
+            f'\tLoaded {len(wordlists[_version]):_} words',
+            f'({len(wordlist_full):_} total)',
+        )
 
     print(f'Loaded {len(wordlist_full):_} total words')
 
