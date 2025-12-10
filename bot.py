@@ -37,7 +37,7 @@ def create_version_string(version: str) -> str:
     version_referenced = find_reference(version)
     if version == version_referenced:
         return version
-    return f'{version_referenced} -> {version}'
+    return f'{version_referenced} → {version}'
 
 
 OPTIONS = {

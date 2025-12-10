@@ -44,7 +44,7 @@ function create_version_string(version) {
     if (version === version_referenced) {
         return version;
     }
-    return `${version_referenced} -> ${version}`;
+    return `${version_referenced} → ${version}`;
 };
 
 function find_definition(word) {
