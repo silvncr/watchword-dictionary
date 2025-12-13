@@ -6,16 +6,21 @@ import platform
 from pathlib import Path
 from string import ascii_uppercase
 
+# import cleanlist
+# import wordlist_cleaner
 import nextcord
+import qrs
 from dotenv import load_dotenv
 from nextcord.ext import commands
+
+# from . import listpatches
 
 load_dotenv()
 
 
 TOKEN = os.environ['DISCORD_TOKEN']
 
-VERSION = '0.5.2'
+VERSION = '0.5.3'
 
 
 WATCHWORD_REFERENCES: dict[str, str | None] = json.loads(
@@ -27,15 +32,30 @@ WATCHWORD_VERSIONS: list[str] = json.loads(
 
 
 class VERSIONS:
-    # main
-    bot = VERSION
-    watchword = WATCHWORD_VERSIONS[0]
-
-    # wordlist
-    qrs = '3.0.0'
-    listpatches = '1.0'
-    wordlist_cleaner = '0.2'
-    cleanlist = '0.1.0-pre'
+    MAIN: dict[str, str] = {  # noqa: RUF012
+        'bot': VERSION,
+        'watchword': WATCHWORD_VERSIONS[0],
+    }
+    WORDLIST: dict[str, str] = {  # noqa: RUF012
+        'qrs': qrs.__version__,
+        'listpatches': '1.0',  # listpatches.__version__
+        'wordlist_cleaner': '0.2',  # wordlist_cleaner.__version__
+        'cleanlist': '0.1.0-pre',  # cleanlist.__version__
+    }
+    HOST: dict[str, str] = {  # noqa: RUF012
+        'os': ' '.join(
+            [
+                *platform.system_alias(
+                    system=platform.system(),
+                    release=platform.release(),
+                    version=platform.version(),
+                )[:-1],
+                platform.machine(),
+            ],
+        ),
+        'python': f'{platform.python_implementation()} {platform.python_version()}',
+        'nextcord': nextcord.__version__,
+    }
 
 
 def find_reference(version: str) -> str:
@@ -98,7 +118,7 @@ def find_definition(word: str) -> str | None:
 @client.event
 async def on_ready() -> None:
     'Event triggered when the bot is ready.'
-    print(f'Logged in as {client.user} ({client.user.id})')  # type: ignore
+    print(f'Logged in as {client.user} ({client.user.id})')
     await client.change_presence(
         activity=nextcord.Activity(
             type=nextcord.ActivityType.watching,
@@ -117,7 +137,8 @@ async def check(
     version: str = OPTIONS['version'],
 ) -> None:
     'Check a word against the Watchword dictionary.'
-    print(f'Check requested by {interaction.user} ({interaction.user.id}) - "{word}"')  # type: ignore
+    print(f'Check requested by {interaction.user} ({interaction.user.id})')
+    print(f'\t"{word}"')
     word = word.upper().strip()
     word = ''.join(c for c in word if c in ascii_uppercase)
     print(f'\tProcessed: "{word}"')
@@ -210,7 +231,8 @@ async def coverage(
             }\n```',
         ),
     )
-    print(f'Coverage requested by {interaction.user} ({interaction.user.id})')  # type: ignore
+    print(f'Coverage requested by {interaction.user} ({interaction.user.id})')
+    print(f'\t{version_s}')
 
 
 @client.slash_command(
@@ -225,29 +247,13 @@ async def host(interaction: nextcord.Interaction) -> None:
             title=':desktop: Host machine',
             description=f'```\n{
                 '\n'.join(
-                    [
-                        f'os: {
-                            ' '.join(
-                                [
-                                    *platform.system_alias(
-                                        system=platform.system(),
-                                        release=platform.release(),
-                                        version=platform.version()
-                                    )[:-1],
-                                    platform.machine()
-                                ]
-                            )
-                        } ',
-                        (
-                            'python:'
-                            f' {platform.python_implementation()}'
-                            f' {platform.python_version()}'
-                        ),
-                    ]
+                    f'{name}: {version}'
+                    for name, version in VERSIONS.HOST.items()
                 )
             }\n```',
         ),
     )
+    print(f'Host requested by {interaction.user} ({interaction.user.id})')
 
 
 @client.slash_command(
@@ -290,6 +296,7 @@ async def info(interaction: nextcord.Interaction) -> None:
             inline=False,
         ),
     )
+    print(f'Info requested by {interaction.user} ({interaction.user.id})')
 
 
 @client.slash_command(name='ping', description='Measure the current bot latency')
@@ -300,10 +307,8 @@ async def ping(interaction: nextcord.Interaction) -> None:
     await interaction.followup.send(
         embed=embed(title=':ping_pong: Pong!', description=f'```\n{_latency} ms\n```'),
     )
-    print(
-        f'Ping requested by {interaction.user} ({interaction.user.id})',
-        f'- {_latency} ms',
-    )
+    print(f'Ping requested by {interaction.user} ({interaction.user.id})')
+    print(f'\t{_latency} ms')
 
 
 @client.slash_command(
@@ -316,24 +321,28 @@ async def versions(interaction: nextcord.Interaction) -> None:
     await interaction.followup.send(
         embed=embed(
             title=':clipboard: Versions',
-            description='\n'.join(
-                [
-                    '```',
-                    '  main',
-                    f'bot: {VERSIONS.bot}',
-                    f'watchword: {VERSIONS.watchword}',
-                    '',
-                    '  wordlist',
-                    f'qrs: {VERSIONS.qrs}',
-                    f'listpatches: {VERSIONS.listpatches}',
-                    f'wordlist-cleaner: {VERSIONS.wordlist_cleaner}',
-                    f'cleanlist: {VERSIONS.cleanlist}',
-                    '```',
-                ],
+            description=(
+                '```\n'
+                '\tmain\n'
+                f'{
+                    '\n'.join(
+                        f'{name}: {version}'
+                        for name, version in VERSIONS.MAIN.items()
+                    )
+                }'
+                '\n\n'
+                '\twordlist\n'
+                f'{
+                    '\n'.join(
+                        f'{name}: {version}'
+                        for name, version in VERSIONS.WORDLIST.items()
+                    )
+                }'
+                '\n```'
             ),
         ),
     )
-    print(f'Info requested by {interaction.user} ({interaction.user.id})')
+    print(f'Versions requested by {interaction.user} ({interaction.user.id})')
 
 
 if __name__ == '__main__':
